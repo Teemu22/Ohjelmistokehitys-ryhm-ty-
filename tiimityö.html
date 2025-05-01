@@ -1,11 +1,113 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <title>Muistipeli</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #f0f0f0;
+    }
+
+    h1 {
+      margin-top: 20px;
+    }
+
+    .game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .card {
+      width: 100px;
+      height: 100px;
+      background-color: #fff;
+      font-size: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #333;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .card.flipped {
+      background-color: #e0ffe0;
+    }
+
+    .card.matched {
+      background-color: #a0e0a0;
+      cursor: default;
+    }
+  </style>
 </head>
 <body>
-    
+  <h1>Muistipeli</h1>
+  <div id="game-board" class="game-board"></div>
+
+  <script>
+    const emojis = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍍', '🥝', '🍉'];
+    let cards = [...emojis, ...emojis].sort(() => 0.5 - Math.random());
+
+    const gameBoard = document.getElementById('game-board');
+    let firstCard = null;
+    let secondCard = null;
+    let lockBoard = false;
+
+    function createCard(emoji) {
+      const card = document.createElement('div');
+      card.classList.add('card');
+      card.dataset.emoji = emoji;
+      card.innerText = '';
+      card.addEventListener('click', handleCardClick);
+      return card;
+    }
+
+    function handleCardClick(e) {
+      if (lockBoard) return;
+      const clickedCard = e.target;
+      if (clickedCard === firstCard || clickedCard.classList.contains('matched')) return;
+
+      clickedCard.innerText = clickedCard.dataset.emoji;
+      clickedCard.classList.add('flipped');
+
+      if (!firstCard) {
+        firstCard = clickedCard;
+        return;
+      }
+
+      secondCard = clickedCard;
+      lockBoard = true;
+
+      if (firstCard.dataset.emoji === secondCard.dataset.emoji) {
+        firstCard.classList.add('matched');
+        secondCard.classList.add('matched');
+        resetTurn();
+      } else {
+        setTimeout(() => {
+          firstCard.innerText = '';
+          secondCard.innerText = '';
+          firstCard.classList.remove('flipped');
+          secondCard.classList.remove('flipped');
+          resetTurn();
+        }, 1000);
+      }
+    }
+
+    function resetTurn() {
+      [firstCard, secondCard] = [null, null];
+      lockBoard = false;
+    }
+
+    cards.forEach(emoji => {
+      const cardElement = createCard(emoji);
+      gameBoard.appendChild(cardElement);
+    });
+  </script>
+
 </body>
 </html>
